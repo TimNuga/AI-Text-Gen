@@ -114,15 +114,16 @@ This project uses **Alembic** to manage database schema changes over time. Below
 1. **Initial Setup**  
    - Install Alembic (already in `requirements.txt`).
    - If you haven’t already, you can initialize Alembic in your local environment by running:
-     ```bash
-     alembic init alembic
-     ```
+```bash
+alembic init alembic
+```
      *(This is already done in this repo, so you should see an `alembic/` folder and `alembic.ini`.)*
 
 2. **Autogenerate New Migrations**  
    Whenever you change your SQLAlchemy models:
-   ```bash
-   alembic revision --autogenerate -m "Your descriptive message"
+```bash
+alembic revision --autogenerate -m "Your descriptive message"
+```
 
    Alembic will create a new file in alembic/versions/. Inspect it to confirm it matches your intended schema changes.
 
