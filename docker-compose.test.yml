@@ -18,7 +18,11 @@ services:
       POSTGRES_HOST: db_test
     depends_on:
       - db_test
-    command: pytest --disable-warnings -s  # automatically run tests
+    command: >
+      bash -c "
+      alembic upgrade head &&
+      pytest --disable-warnings -s
+      "
 
 volumes:
   db_test_data:

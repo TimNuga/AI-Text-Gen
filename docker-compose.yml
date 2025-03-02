@@ -20,6 +20,11 @@ services:
       - "5000:5000"
     depends_on:
       - db
+    command: >
+      bash -c "
+      alembic upgrade head &&
+      python -m app.main
+      "
 
 volumes:
   db_data:

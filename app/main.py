@@ -11,10 +11,6 @@ def create_app():
     db.init_app(app)
     jwt = JWTManager(app)
 
-    with app.app_context():
-        # Create database tables if they don't exist
-        db.create_all()
-
     # Register Blueprint
     app.register_blueprint(api, url_prefix="/")
 

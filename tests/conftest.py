@@ -3,6 +3,7 @@ import pytest
 from dotenv import load_dotenv
 from unittest.mock import patch, MagicMock
 from sqlalchemy.orm import scoped_session, sessionmaker
+import subprocess
 
 from app.main import create_app
 from app.models import db as _db
@@ -75,6 +76,15 @@ def client(app, db):
     """
     with app.test_client() as client:
         yield client
+
+@pytest.fixture(scope="session", autouse=True)
+def run_migrations():
+    """
+    Runs Alembic migrations once at the beginning of the test session
+    and optionally downgrades at the end.
+    """
+    subprocess.run(["alembic", "upgrade", "head"], check=True)
+    yield
 
 
 @pytest.fixture

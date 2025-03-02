@@ -11,14 +11,15 @@ This repository provides a Flask application that:
 1. [Overview](#overview)  
 2. [Project Structure](#project-structure)  
 3. [Setup & Configuration](#setup--configuration)  
-4. [Running the Application](#running-the-application)  
+4. [Database Migrations (Alembic)](#database-migrations-alembic)  
+5. [Running the Application](#running-the-application)  
    - [Local (Without Docker)](#local-without-docker)  
    - [Docker Compose (Development)](#docker-compose-development)  
-5. [Testing](#testing)  
+6. [Testing](#testing)  
    - [Local Testing With a Dedicated Test DB](#local-testing-with-a-dedicated-test-db)  
    - [Docker Compose Testing](#docker-compose-testing)  
-6. [API Endpoints](#api-endpoints)  
-7. [Additional Notes](#additional-notes)
+7. [API Endpoints](#api-endpoints)  
+8. [Additional Notes](#additional-notes)
 
 ---
 
@@ -106,26 +107,66 @@ JWT_SECRET_KEY=super-jwt-secret-test-key
 OPENAI_API_KEY=fake_test_key
 ```
 
-## 4. Running the Application
+## 4. Database Migrations (Alembic)
 
-### 4.1 Local (Without Docker)
+This project uses **Alembic** to manage database schema changes over time. Below are the key commands you’ll need:
+
+1. **Initial Setup**  
+   - Install Alembic (already in `requirements.txt`).
+   - If you haven’t already, you can initialize Alembic in your local environment by running:
+     ```bash
+     alembic init alembic
+     ```
+     *(This is already done in this repo, so you should see an `alembic/` folder and `alembic.ini`.)*
+
+2. **Autogenerate New Migrations**  
+   Whenever you change your SQLAlchemy models:
+   ```bash
+   alembic revision --autogenerate -m "Your descriptive message"
+
+   Alembic will create a new file in alembic/versions/. Inspect it to confirm it matches your intended schema changes.
+
+3. **Apply Migrations**
+   To bring your DB to the latest schema:
+
+```bash
+alembic upgrade head
+```
+
+   If you need to revert to a previous revision:
+
+```bash
+alembic downgrade <revision>
+```
+
+   or to go all the way back to an empty DB:
+
+```bash
+alembic downgrade base
+```
+
+## 5. Running the Application
+
+### 5.1 Local (Without Docker)
 1. Install PostgreSQL (if not already) and ensure it’s running.
 2. Create a database (e.g., ai_text_gen_db) and user matching your .env credentials.
-3. Create a virtual environment and install dependencies:
+3. Run Alembic migrations to ensure your local DB has the latest schema:
+```bash
+alembic upgrade head
+```
+4. Create a virtual environment and install dependencies:
 ```bash
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
-4. Run the app:
+5. Run the app:
 ```bash
 python -m app.main
 ```
-5. Access at http://127.0.0.1:5000.
+6. Access at http://127.0.0.1:5000.
 
-Note: The application automatically calls db.create_all() on startup to ensure tables exist.
-
-### 4.2 Docker Compose (Development)
+### 5.2 Docker Compose (Development)
 1. Update .env with your dev environment variables.
 2. Run:
 ```bash
@@ -135,9 +176,9 @@ If you’re on an older Docker version, use docker-compose up --build
 3. Access at http://localhost:5000.
 4. Data Persistence: By default, the Postgres container uses a named volume (e.g., db_data) defined in docker-compose.yml, preserving data across container restarts.
 
-## 5. Testing
+## 6. Testing
 
-### 5.1 Local Testing With a Dedicated Test DB
+### 6.1 Local Testing With a Dedicated Test DB
 If you prefer running tests on your host machine:
 
 1. Create a test DB (e.g., `ai_text_gen_test_db`) in Postgres
@@ -154,7 +195,7 @@ This will:
 - Load `.env.test` (via `conftest.py` or `pytest-dotenv`, if configured).
 - Spin up a Flask test client, connect to the test db, create tables, run all tests, then tear down.
 
-### 5.2 Docker Compose Testing
+### 6.2 Docker Compose Testing
 We also provide a docker-compose.test.yml for running tests in containers, ensuring a reproducible environment (especially useful for CI/CD).
 
 1. Check .env.test ensures credentials match what’s in docker-compose.test.yml.
@@ -167,7 +208,7 @@ This:
 - Builds a web_test container running pytest --disable-warnings -s.
 - Shuts down automatically when tests finish (due to --abort-on-container-exit).
 
-## 6. API Endpoints
+## 7. API Endpoints
 Base URL: http://localhost:5000 (or http://127.0.0.1:5000 if local)
 
 1. POST /register
@@ -213,7 +254,7 @@ Send the token in the Authorization header:
 Authorization: Bearer <access_token>
 ```
 
-## 7. Additional Notes
+## 8. Additional Notes
 - Mocking OpenAI: Our tests illustrate how to mock `openai.Completion.create()` with `unittest.mock.patch` or via a fixture, avoiding real API calls.
 - Production Considerations:
     - Use a secure `SECRET_KEY` and `JWT_SECRET_KEY`.
