@@ -7,4 +7,6 @@ venv/
 .env
 .env.test
 
+alembic/versions/
+
 .pytest_cache/
