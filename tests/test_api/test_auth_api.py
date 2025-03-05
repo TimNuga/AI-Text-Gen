@@ -1,10 +1,10 @@
 import pytest
 from flask import Flask
 
-def test_register_success(client, session):
+def test_register_success(client, truncate_tables):
     response = client.post("/auth/register", json={
         "username": "SomeUser",
-        "password": "somepass"
+        "password": "somepassword"
     })
     assert response.status_code == 201
     data = response.get_json()

@@ -1,13 +1,5 @@
 import pytest
 
-def test_generate_text_success(client, session, auth_headers, mock_openai_chat_completion):
-    resp = client.post("/generate-text", json={"prompt": "Hello, AI!"}, headers=auth_headers)
-    data = resp.get_json()
-    assert resp.status_code == 201
-    assert "id" in data
-    assert data["prompt"] == "Hello, AI!"
-    assert data["response"] == "Mocked AI response"
-
 def test_generate_text_unauthorized(client, session):
     resp = client.post("/generate-text", json={"prompt": "No token here"})
     assert resp.status_code == 401

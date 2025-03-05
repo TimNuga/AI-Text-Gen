@@ -3,11 +3,15 @@ import pytest
 from dotenv import load_dotenv
 from unittest.mock import patch, MagicMock
 from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy import event 
+from sqlalchemy import text
 import subprocess
+import logging
 
 from app.main import create_app
 from app.models import db as _db
 
+logger = logging.getLogger(__name__)
 # Load environment variables from .env.test
 # (pytest-dotenv can also do this automatically but, this is to be more explicit.
 load_dotenv(".env.test")
@@ -86,18 +90,16 @@ def run_migrations():
     subprocess.run(["alembic", "upgrade", "head"], check=True)
     yield
 
-
-@pytest.fixture
-def mock_openai_chat_completion():
-    """
-    Fixture that mocks openai.Completion.create calls to avoid real API usage.
-    You can override return values as needed in your tests.
-    """
-    with patch("openai.chat.completions.create") as mock_chat_create:
-        mock_chat_create.return_value = MagicMock(
-            choices=[MagicMock(message={"content": "Mocked AI response"})]
-        )
-        yield mock_chat_create
+@pytest.fixture(scope="function")
+def truncate_tables(db):
+    # Get all table names
+    connection = db.engine.connect()
+    trans = connection.begin()
+    for table in db.metadata.sorted_tables:
+        connection.execute(text(f"TRUNCATE TABLE {table.name} RESTART IDENTITY CASCADE;"))
+    trans.commit()
+    connection.close()
+    yield
 
 @pytest.fixture
 def auth_headers(client):

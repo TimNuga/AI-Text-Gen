@@ -24,8 +24,9 @@ services:
       - db
     command: >
       bash -c "
-      alembic upgrade head &&
-      python -m app.main
+        sleep 10 &&
+        alembic upgrade head &&
+        python -m app.main
       "
 
 volumes:
