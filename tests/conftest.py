@@ -44,7 +44,7 @@ def db(app):
         _db.drop_all()
 
 @pytest.fixture(scope="function", autouse=True)
-def session_rollback(app, db):
+def session(app, db):
     """
     Runs each test in its own transaction and then rolls it back,
     preventing leftover data from one test affecting others.
@@ -88,13 +88,31 @@ def run_migrations():
 
 
 @pytest.fixture
-def mock_openai_completion():
+def mock_openai_chat_completion():
     """
     Fixture that mocks openai.Completion.create calls to avoid real API usage.
     You can override return values as needed in your tests.
     """
-    with patch("openai.Completion.create") as mock_create:
-        mock_create.return_value = MagicMock(
-            choices=[MagicMock(text="Mocked AI response")]
+    with patch("openai.chat.completions.create") as mock_chat_create:
+        mock_chat_create.return_value = MagicMock(
+            choices=[MagicMock(message={"content": "Mocked AI response"})]
         )
-        yield mock_create
+        yield mock_chat_create
+
+@pytest.fixture
+def auth_headers(client):
+    """
+    Creates a default user and logs them in, returning the Authorization header.
+    """
+    # Register
+    client.post("/auth/register", json={
+        "username": "TestUser",
+        "password": "password123"
+    })
+    # Login
+    login_resp = client.post("/auth/login", json={
+        "username": "TestUser",
+        "password": "password123"
+    })
+    token = login_resp.get_json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}

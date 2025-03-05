@@ -16,8 +16,10 @@ services:
     restart: always
     env_file: 
       - .env
+    environment:
+      POSTGRES_HOST: db
     ports:
-      - "5000:5000"
+      - "5002:5002"
     depends_on:
       - db
     command: >
