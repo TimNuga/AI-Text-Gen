@@ -45,13 +45,38 @@ A typical directory layout:
         ├── init.py │ 
         ├── config.py │ 
         ├── models.py │ 
-        ├── routes.py │ 
+        ├── validation.py │ 
+        ├──routes |
+                  ├──init.py
+                  ├──auth_routes.py
+                  ├──generated_text_routes.py
+                  └──user_routes.py
+        ├──services |
+                    ├──init.py
+                    ├──ai_service.py
+                    └──user_service.py
+        ├──repositories |
+                        ├──init.py
+                        ├──generated_text_repository.py
+                        └──user_repository.py
+        ├──providers |
+                     ├──init.py
+                     ├──base_ai_provider.py
+                     └──openai_provider.py
         └── main.py 
 ├── tests │ 
           ├── init.py │ 
           ├── conftest.py │ 
-          ├── test_auth.py │ 
-          ├── test_generated_text.py 
+          ├── test_api │
+                       ├──test_auth_api.py
+                       ├──test_generate_text.py
+                       └──test_user_api.py
+          ├── test_repositories |
+                                ├──test_generated_text_repository.py
+                                └──test_user_repository.py
+          ├──test_services |
+                           ├──test_ai_service.py
+                           └──test_user_service.py
 ├── .env (example environment file for dev) 
 ├── .env.test (example environment file for testing) 
 ├── docker-compose.yml 
@@ -61,10 +86,10 @@ A typical directory layout:
 └── README.md
 
 
-### Notable Files
+### Notable Files/Folders
 - **`app/config.py`**: Loads environment variables and sets up Flask config.  
 - **`app/models.py`**: Defines `User` and `GeneratedText` models, plus SQLAlchemy integration.  
-- **`app/routes.py`**: All API endpoints (register, login, generate-text, CRUD).  
+- **`app/routes`**: All API endpoints (register, login, generate-text, CRUD).  
 - **`app/main.py`**: App factory (create_app) and the main entry point.  
 - **`tests/`**: Pytest-based test suite, including fixtures and test modules.  
 - **`docker-compose.yml`**: Defines containers for PostgreSQL and the Flask app (dev or production usage).  
